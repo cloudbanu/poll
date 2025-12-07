@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .poll-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .poll-title {
+            font-size: 23px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .poll-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .poll-option input {
+            display: none; /* Hide radio buttons */
+        }
+        .poll-option img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .poll-button, .results-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+        .poll-results {
+            margin-top: 20px;
+            display: none; /* Initially hidden */
+        }
+        .poll-results .poll-result {
+            margin-bottom: 10px;
+        }
+        .selection-indicator {
+            font-size: 18px;
+            color: green;
+            display: none; /* Initially hidden */
+        }
+        .preview-message {
+            font-size: 16px;
+            color: red;
+            display: none; /* Initially hidden */
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="poll-container">
+        <div class="poll-title">VADI HUDA ENGLISH MEDIUM SCHOOL</div>
+        <div class="poll-options">
+            <div class="poll-option">
+                <input type="radio" id="ishan" name="poll" value="ANZIL KT">
+                 ANZIL KT
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="fadil" name="poll" value="MUHAMMED AMAN">
+                 MUHAMMED AMAN
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="najim" name="poll" value="AFRA EK">
+                 AFRA EK
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="ajmal" name="poll" value="RILFA FATHIMA">
+                 RILFA FATHIMA
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="salma" name="poll" value="MUHAMMED ABSWAR TP">
+                 MUHAMMED ABSWAR TP
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="haifa" name="poll" value="MUHAMMED ZAYAN KK">
+                 MUHAMMED ZAYAN KK
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="faiha" name="poll" value="FATHIMA RANA">
+                 FATHIMA RANA
+            </div>
+            <div class="poll-option">
+                <input type="radio" id="nota" name="poll" value="SHAYAN IBRAHIM">
+                 SHAYAN IBRAHIM
+            </div>
+        </div>
+        <div class="selection-indicator" id="selection-indicator">✓ Selected</div>
+        <div class="toggle-container">
+            <label class="toggle-switch">
+                <input type="checkbox" id="preview-toggle">
+                <span class="slider"></span>
+            </label>
+            <span>Always Show Preview</span>
+        </div>
+        <button class="poll-button" onclick="submitVote()">Vote</button>
+        <button class="results-button" onclick="showResults()">Show Results</button>
+        <div class="poll-results" id="poll-results">
+            <!-- Results will be displayed here -->
+        </div>
+        <audio id="audio" src="abc.mp3" preload="auto"></audio>
+        <div class="preview-message" id="preview-message">No option selected!</div>
+    </div>
+
+    <script>
+        let votes = {
+            'ANZIL KT': 0,
+            'MUHAMMED AMAN': 0,
+            'AFRA EK': 0,
+            'RILFA FATHIMA': 0,
+            'MUHAMMED ABSWAR TP': 0,
+            'MUHAMMED ZAYAN KK': 0,
+            'FATHIMA RANA': 0,
+            'SHAYAN IBRAHIM': 0
+        };
+
+        document.addEventListener('keydown', function(event) {
+            const audio = document.getElementById('audio');
+            const keyToOption = {
+                '`': 'ishan',
+                '2': 'fadil',
+                '4': 'najim',
+                '7': 'ajmal',
+                '8': 'salma',
+                '0': 'haifa',
+                '=': 'faiha',
+                '/': 'nota'
+            };
+
+            if (keyToOption[event.key]) {
+                document.getElementById(keyToOption[event.key]).checked = true;
+                audio.play();
+                document.getElementById('selection-indicator').style.display = 'block';
+                if (document.getElementById('preview-toggle').checked) {
+                    showPreview();
+                }
+            }
+        });
+
+        function showPreview() {
+            const options = document.getElementsByName('poll');
+            let selectedOption = '';
+            for (const option of options) {
+                if (option.checked) {
+                    selectedOption = option.value;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                document.getElementById('preview-message').textContent = `Selected: ${selectedOption}`;
+                document.getElementById('preview-message').style.color = 'green';
+            } else {
+                document.getElementById('preview-message').textContent = 'No option selected!';
+                document.getElementById('preview-message').style.color = 'red';
+            }
+            document.getElementById('preview-message').style.display = 'block';
+        }
+
+        function submitVote() {
+            const options = document.getElementsByName('poll');
+            let selectedOption = '';
+            for (const option of options) {
+                if (option.checked) {
+                    selectedOption = option.value;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                votes[selectedOption]++;
+                alert('Your vote has been submitted!');
+                clearSelection();
+                document.getElementById('selection-indicator').style.display = 'none';
+                document.getElementById('preview-message').style.display = 'none';
+            } else {
+                alert('Please select an option!');
+            }
+        }
+
+        function clearSelection() {
+            const options = document.getElementsByName('poll');
+            for (const option of options) {
+                option.checked = false;
+            }
+        }
+
+        function showResults() {
+            const resultsContainer = document.getElementById('poll-results');
+            resultsContainer.innerHTML = '';
+            const sortedVotes = Object.entries(votes).sort((a, b) => b[1] - a[1]);
+            for (const [option, count] of sortedVotes) {
+                const resultDiv = document.createElement('div');
+                resultDiv.classList.add('poll-result');
+                resultDiv.textContent = `${option}: ${count} vote(s)`;
+                resultsContainer.appendChild(resultDiv);
+            }
+            resultsContainer.style.display = 'block';
+        }
+
+        document.getElementById('preview-toggle').addEventListener('change', function() {
+            if (this.checked) {
+                showPreview();
+            } else {
+                document.getElementById('preview-message').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

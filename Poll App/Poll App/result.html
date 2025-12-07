@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Results</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #d2e2ff, #9fb5fc);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out, box-shadow 0.6s ease-in-out;
+        }
+        .container.preview {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            background: #618bff;
+            color: #fff;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .poll-result {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        .poll-result.highlight {
+            background: #e1edff;
+        }
+        .poll-result.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .poll-result:last-child {
+            border-bottom: none;
+        }
+        .candidate {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .candidate img {
+            width: 70px;
+            height: 70px;
+            margin-right: 15px;
+            border-radius: 50%;
+            border: 2px solid #61b8ff;
+            cursor: pointer;
+        }
+        .candidate-info {
+            flex: 1;
+        }
+        .candidate-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .votes {
+            font-size: 1.2em;
+            color: #61c0ff;
+            text-align: right;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .bar-container {
+            background: #f1f1f1;
+            border-radius: 25px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .bar {
+            height: 25px;
+            border-radius: 25px;
+            text-align: right;
+            padding: 0 10px;
+            color: #fff;
+            line-height: 25px;
+        }
+        .add-new, .complete {
+            background: #0683f7;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            margin: 20px;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+        .add-new:hover, .complete:hover {
+            background: #61a0ff;
+        }
+        .complete {
+            display: none;
+        }
+        .preview-active .complete {
+            display: block;
+        }
+        .preview-active .add-new {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="pollContainer">
+        <div class="header">
+            <h1>Poll Results</h1>
+        </div>
+        <div id="results">
+            <div class="poll-result">
+                <div class="candidate">
+                    <img src="https://via.placeholder.com/70" alt="Candidate 1" onclick="editPhoto(this)">
+                    <div class="candidate-info">
+                        <div class="candidate-name" onclick="editName(this)">Candidate 1</div>
+                    </div>
+                </div>
+                <div class="votes" onclick="editVotes(this)">1234 votes</div>
+                <div class="bar-container">
+                    <div class="bar" data-votes="1234" style="background: #61a5ff;">1234</div>
+                </div>
+            </div>
+            <!-- Add more candidates here with the same structure -->
+        </div>
+        <div class="add-new" onclick="addNewCandidate()">Add New Candidate</div>
+        <div class="complete" onclick="togglePreview()">Complete</div>
+    </div>
+    <script>
+        function editName(element) {
+            const newName = prompt('Enter new name:', element.innerText);
+            if (newName) {
+                element.innerText = newName;
+            }
+        }
+
+        function editVotes(element) {
+            const newVotes = prompt('Enter new vote count:', element.innerText.replace(' votes', ''));
+            if (newVotes && !isNaN(newVotes)) {
+                element.innerText = `${newVotes} votes`;
+                const bar = element.nextElementSibling.querySelector('.bar');
+                bar.innerText = newVotes;
+                bar.setAttribute('data-votes', newVotes);
+                updateBars();
+                sortCandidates();
+            } 
+        }
+
+        function editPhoto(img) {
+            const newUrl = prompt('Enter new photo URL:', img.src);
+            if (newUrl) {
+                img.src = newUrl;
+            }
+        }
+
+        function updateBars() {
+            const bars = document.querySelectorAll('.bar');
+            let maxVotes = 0;
+            bars.forEach(bar => {
+                const votes = parseInt(bar.getAttribute('data-votes'), 10);
+                if (votes > maxVotes) maxVotes = votes;
+            });
+            bars.forEach(bar => {
+                const votes = parseInt(bar.getAttribute('data-votes'), 10);
+                const percentage = (votes / maxVotes) * 100;
+                bar.style.width = `${percentage}%`;
+            });
+        }
+
+        function addNewCandidate() {
+            const container = document.getElementById('results');
+            const newCandidate = document.createElement('div');
+            newCandidate.classList.add('poll-result');
+            newCandidate.innerHTML = `
+                <div class="candidate">
+                    <img src="https://via.placeholder.com/70" alt="New Candidate" onclick="editPhoto(this)">
+                    <div class="candidate-info">
+                        <div class="candidate-name" onclick="editName(this)">New Candidate</div>
+                    </div>
+                </div>
+                <div class="votes" onclick="editVotes(this)">0 votes</div>
+                <div class="bar-container">
+                    <div class="bar" data-votes="0" style="background: #ff6f61;">0</div>
+                </div>
+            `;
+            container.appendChild(newCandidate);
+            updateBars();
+            sortCandidates();
+        }
+
+        function sortCandidates() {
+            const container = document.getElementById('results');
+            const candidates = Array.from(container.getElementsByClassName('poll-result'));
+
+            candidates.sort((a, b) => {
+                const aVotes = parseInt(a.querySelector('.bar').getAttribute('data-votes'), 10);
+                const bVotes = parseInt(b.querySelector('.bar').getAttribute('data-votes'), 10);
+                return bVotes - aVotes;
+            });
+
+            // Remove existing highlight classes
+            candidates.forEach(candidate => candidate.classList.remove('highlight'));
+
+            // Highlight the candidate with the most votes
+            if (candidates.length > 0) {
+                candidates[0].classList.add('highlight');
+            }
+
+            // Re-append sorted candidates
+            candidates.forEach(candidate => container.appendChild(candidate));
+        }
+
+        function togglePreview() {
+            const container = document.getElementById('pollContainer');
+            const results = document.querySelectorAll('.poll-result');
+            container.classList.toggle('preview');
+            results.forEach((result, index) => {
+                setTimeout(() => {
+                    result.classList.toggle('hidden');
+                }, index * 100);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBars();
+            sortCandidates();
+        });
+    </script>
+</body>
+</html>
